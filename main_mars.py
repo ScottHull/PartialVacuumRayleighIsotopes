@@ -166,12 +166,14 @@ for initial_comp_index, (initial_comp_name, initial_comp) in enumerate(runs.item
 letters = list(string.ascii_lowercase)
 for index, ax in enumerate(axs.flatten()):
     ax.grid()
-    ax.set_yscale('log')
     if index % 2 == 0:
+        # ax.set_yscale('log')
+        ax.set_ylim(0, 30)
         ax.set_ylabel(r'$\Delta \rm ^{41}K$')
     ax.text(0.08, 0.9, letters[index], transform=ax.transAxes, fontsize=18, fontweight='bold')
 
 axs.flatten()[-2].set_xlabel(r'$f_{\rm melt}$ (%)')
+axs.flatten()[-1].set_xlabel('% Recondensed')
 
 axs[0, 0].legend(loc='lower left', fontsize=16)
 
