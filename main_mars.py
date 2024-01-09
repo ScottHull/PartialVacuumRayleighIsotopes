@@ -27,24 +27,28 @@ runs = {
             "G": {
                 "f_melt": 0.1110142203842716,
                 "f_esc": 92 / 100,
+                "impactor%": 70.758 / 100,  # %
                 "color": prop_cycle[0],
                 # "linestyle": "solid",
             },
             "H": {
                 "f_melt": 0.6161276097168675,
                 "f_esc": 88 / 100,
+                "impactor%": 65.81413641 / 100,  # %
                 "color": prop_cycle[1],
                 # "linestyle": "solid",
             },
             "K": {
                 "f_melt": 0.7661014262659456,
                 "f_esc": 89 / 100,
+                "impactor%": 16.6080938 / 100,  # %
                 "color": prop_cycle[2],
                 # "linestyle": "solid",
             },
             "L": {
                 "f_melt": 0.696745959557069,
-                "f_esc": 88 / 100,
+                "f_esc": 85 / 100,
+                "impactor%": 71.23136432 / 100,  # %
                 "color": prop_cycle[3],
                 # "linestyle": "solid",
             },
@@ -53,24 +57,28 @@ runs = {
         "G": {
             "f_melt": 0.4747236882995573,
             "f_esc": 92 / 100,
+            "impactor%": 70.758 / 100,  # %
             "color": prop_cycle[0],
             # "linestyle": "solid",
         },
         "H": {
             "f_melt": 0.7503664568288573,
             "f_esc": 88 / 100,
+            "impactor%": 65.81413641 / 100,  # %
             "color": prop_cycle[1],
             # "linestyle": "solid",
         },
         "K": {
             "f_melt": 0.8537028910311829,
             "f_esc": 89 / 100,
+            "impactor%": 16.6080938 / 100,  # %
             "color": prop_cycle[2],
             # "linestyle": "solid",
         },
         "L": {
             "f_melt": 0.8068516595175024,
             "f_esc": 88 / 100,
+            "impactor%": 71.23136432 / 100,  # %
             "color": prop_cycle[3],
             # "linestyle": "solid",
         },
@@ -79,24 +87,28 @@ runs = {
         "G": {
             "f_melt": 0.4031781207842613,
             "f_esc": 92 / 100,
+            "impactor%": 70.758 / 100,  # %
             "color": prop_cycle[0],
             # "linestyle": "solid",
         },
         "H": {
             "f_melt": 0.7171408019555808,
             "f_esc": 88 / 100,
+            "impactor%": 65.81413641 / 100,  # %
             "color": prop_cycle[1],
             # "linestyle": "solid",
         },
         "K": {
             "f_melt": 0.7777525051897846,
             "f_esc": 89 / 100,
+            "impactor%": 16.6080938 / 100,  # %
             "color": prop_cycle[2],
             # "linestyle": "solid",
         },
         "L": {
             "f_melt": 0.7867401495665421,
-            "f_esc": 88 / 100,
+            "f_esc": 85 / 100,
+            "impactor%": 71.23136432 / 100,  # %
             "color": prop_cycle[3],
             # "linestyle": "solid",
         },
@@ -155,12 +167,12 @@ for initial_comp_index, (initial_comp_name, initial_comp) in enumerate(runs.item
             f * 100,
             np.array([two_reservoir_mixing(initial_vap_result['offset residual melt'],
                                            physical_fractionation(delta_i['delta_i,Lunar'], run)['retained vapor'], x, run) for x in f]),
-            linewidth=2.0, color=run['color']
+            linewidth=3.0, color=run['color']
         )
         axs[initial_comp_index, 1].plot(
             f * 100,
             np.array([two_reservoir_mixing(initial_vap_result['offset residual melt'], initial_vap_result['offset extract vapor'], x, run)
-            for x in f]), linewidth=2.0, color=run['color'], linestyle="dashdot"
+            for x in f]), linewidth=3.0, color=run['color'], linestyle="dashdot"
         )
 
 letters = list(string.ascii_lowercase)
@@ -168,14 +180,17 @@ for index, ax in enumerate(axs.flatten()):
     ax.grid()
     if index % 2 == 0:
         # ax.set_yscale('log')
-        ax.set_ylim(0, 30)
+        ax.set_ylim(0, 55)
         ax.set_ylabel(r'$\Delta \rm ^{41}K$')
-    ax.text(0.08, 0.9, letters[index], transform=ax.transAxes, fontsize=18, fontweight='bold')
+    ax.text(0.05, 0.9, letters[index], transform=ax.transAxes, fontsize=18, fontweight='bold')
 
 axs.flatten()[-2].set_xlabel(r'$f_{\rm melt}$ (%)')
 axs.flatten()[-1].set_xlabel('% Recondensed')
+axs.flatten()[0].set_title("Impact Vaporization", fontsize=18)
+axs.flatten()[1].set_title("Retained Vapor Recondensation", fontsize=18)
 
 axs[0, 0].legend(loc='lower left', fontsize=16)
 
 plt.tight_layout()
-plt.show()
+# plt.show()
+plt.savefig("mars_k_isotopes.png", format='png', dpi=200)
