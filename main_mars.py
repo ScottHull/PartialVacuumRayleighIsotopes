@@ -1,4 +1,6 @@
+import os
 import numpy as np
+import pandas as pd
 import string
 import matplotlib.pyplot as plt
 
@@ -146,6 +148,11 @@ def two_reservoir_mixing(delta_residual_melt, delta_retained_vapor, x_vap_recond
     f = calc_f_melt_vap(x_vap_recondense, run)
     return delta_residual_melt * f + delta_retained_vapor * (1 - f)
 
+global_solutions = {"run_name": [], 'f_melt': [], 'initial vaporization melt': [], 'initial vaporization vapor': [],
+                    # 'no recondensation no phys frac': [],
+                    'full recondensation no phys frac': [],
+                    # 'no recondensation with phys frac': [],
+                    'full recondensation with phys frac': []}
 
 # make a len(runs) rows x 2 columns figure
 fig, axs = plt.subplots(len(runs), 2, figsize=(10, len(runs) * 5), sharex='all')
@@ -157,23 +164,37 @@ for initial_comp_index, (initial_comp_name, initial_comp) in enumerate(runs.item
         f * 100, [initial_vaporization(f_i, delta_i['delta_i,BSE'])['offset residual melt'] for f_i in f], linewidth=2.0, color='black', alpha=1
     )
     for run_index, (run_name, run) in enumerate(initial_comp.items()):
+        global_solutions['run_name'].append(f"{run_name} ({initial_comp_name})")
+        global_solutions['f_melt'].append(f"{run['f_melt']:.2f}")
         run['f_melt_vap'] = run['f_melt'] / (run['f_melt'] + (1 - run['f_melt']) * (1 - run['f_esc']))
         initial_vap_result = initial_vaporization(run['f_melt'], delta_i['delta_i,BSE'])
+        global_solutions['initial vaporization melt'].append(f"{initial_vap_result['offset residual melt']:.2f}")
+        global_solutions['initial vaporization vapor'].append(f"{initial_vap_result['offset extract vapor']:.2f}")
+        recondensation_no_phys_frac = np.array([two_reservoir_mixing(initial_vap_result['offset residual melt'], initial_vap_result['offset extract vapor'], x, run)
+            for x in f])
+        recondensation_w_phys_frac = np.array([two_reservoir_mixing(initial_vap_result['offset residual melt'],
+                                           physical_fractionation(delta_i['delta_i,Lunar'], run)['retained vapor'], x, run) for x in f])
+        # global_solutions['no recondensation no phys frac'].append(recondensation_no_phys_frac[0])
+        global_solutions['full recondensation no phys frac'].append(f"{recondensation_no_phys_frac[-1]:.2f}")
+        # global_solutions['no recondensation with phys frac'].append(recondensation_w_phys_frac[0])
+        global_solutions['full recondensation with phys frac'].append(f"{recondensation_w_phys_frac[-1]:.2f}")
         axs[initial_comp_index, 0].scatter(
             run['f_melt'] * 100, initial_vap_result['offset residual melt'],
             marker='o', color=run['color'], s=160, alpha=1, label=f'Run {run_name}'
         )
         axs[initial_comp_index, 1].plot(
-            f * 100,
-            np.array([two_reservoir_mixing(initial_vap_result['offset residual melt'],
-                                           physical_fractionation(delta_i['delta_i,Lunar'], run)['retained vapor'], x, run) for x in f]),
-            linewidth=3.0, color=run['color']
+            f * 100, recondensation_w_phys_frac, linewidth=3.0, color=run['color']
         )
         axs[initial_comp_index, 1].plot(
-            f * 100,
-            np.array([two_reservoir_mixing(initial_vap_result['offset residual melt'], initial_vap_result['offset extract vapor'], x, run)
-            for x in f]), linewidth=3.0, color=run['color'], linestyle="dashdot"
+            f * 100, recondensation_no_phys_frac, linewidth=3.0, color=run['color'], linestyle="dashdot"
         )
+
+df = pd.DataFrame(global_solutions).to_latex(index=False)
+if "mars_isotopes.tex" in os.listdir():
+    os.remove("mars_isotopes.tex")
+with open("mars_isotopes.tex", "w") as f:
+    f.write(df)
+f.close()
 
 letters = list(string.ascii_lowercase)
 for index, ax in enumerate(axs.flatten()):
