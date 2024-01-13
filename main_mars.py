@@ -19,9 +19,7 @@ delta_i = {
     'delta_i,Lunar-BSE': 0.415,
     'delta_i,Lunar-BSE (+/-err)': 0.05,
 }
-saturation_index = 0.001  # P_i / P_sat
 alpha_kin = (39 / 41) ** 0.43  # the kinetic fractionation factor
-alpha_evap = 1 + (1 - saturation_index) * (alpha_kin - 1)  # the evaporative fractionation factor
 alpha_phys = np.sqrt(39 / 41)
 # f_melt_vap = f_melt / (f_melt + (1 - f_melt) * (1 - f_esc))
 runs = {
@@ -117,9 +115,18 @@ runs = {
     },
 }
 
+saturation_indices = {
+    'G': 0.07153514070532385,
+    'H': 0.102519441414331,
+    'K': 0.04789976312884592,
+    'L': 0.04141597509920847,
+}
+
 f = np.array(list(np.arange(0.0001, 0.1, 0.001)) + list(np.arange(0.1, 1, 0.01)))
 
-def initial_vaporization(f, delta_initial):
+def initial_vaporization(run_name, f, delta_initial):
+    saturation_index = 0.001
+    alpha_evap = 1 + (1 - saturation_index) * (alpha_kin - 1)  # the evaporative fractionation factor
     residual_melt = (f ** (alpha_evap - 1) - 1) * 1000
     extract_vapor = ((1 - f ** alpha_evap) / (1 - f) - 1) * 1000
     return {
@@ -160,14 +167,16 @@ for initial_comp_index, (initial_comp_name, initial_comp) in enumerate(runs.item
     axs[initial_comp_index, 0].text(
         0.65, 0.90, f"{initial_comp_name}", transform=axs[initial_comp_index, 0].transAxes, fontsize=22, fontweight='bold'
     )
-    axs[initial_comp_index, 0].plot(
-        f * 100, [initial_vaporization(f_i, delta_i['delta_i,BSE'])['offset residual melt'] for f_i in f], linewidth=2.0, color='black', alpha=1
-    )
+    # TODO: re-enable this!
+    # shade the region between the min and max satu
+    # axs[initial_comp_index, 0].plot(
+    #     f * 100, [initial_vaporization(f_i, delta_i['delta_i,BSE'])['offset residual melt'] for f_i in f], linewidth=2.0, color='black', alpha=1
+    # )
     for run_index, (run_name, run) in enumerate(initial_comp.items()):
         global_solutions['run_name'].append(f"{run_name} ({initial_comp_name})")
         global_solutions['f_melt'].append(f"{run['f_melt']:.2f}")
         run['f_melt_vap'] = run['f_melt'] / (run['f_melt'] + (1 - run['f_melt']) * (1 - run['f_esc']))
-        initial_vap_result = initial_vaporization(run['f_melt'], delta_i['delta_i,BSE'])
+        initial_vap_result = initial_vaporization(run_name, run['f_melt'], delta_i['delta_i,BSE'])
         global_solutions['initial vaporization melt'].append(f"{initial_vap_result['offset residual melt']:.2f}")
         global_solutions['initial vaporization vapor'].append(f"{initial_vap_result['offset extract vapor']:.2f}")
         recondensation_no_phys_frac = np.array([two_reservoir_mixing(initial_vap_result['offset residual melt'], initial_vap_result['offset extract vapor'], x, run)
