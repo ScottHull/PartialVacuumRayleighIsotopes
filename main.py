@@ -119,10 +119,10 @@ for ax in axs:
             [], [], color=run['color'], linewidth=2.0, label=name
         )
     # alphabetically label each subplot in the top left corner
-    ax.text(
-        0.05, 0.9, letters[axs.tolist().index(ax)], transform=ax.transAxes,
-        size=16, weight='bold'
-    )
+    # ax.text(
+    #     0.95, 0.05, letters[axs.tolist().index(ax)], transform=ax.transAxes,
+    #     size=16, weight='bold'
+    # )
 
 # ================================= Plot Residual Melt / Vapor Extract =================================
 axs[0].plot(
@@ -136,9 +136,9 @@ axs[0].plot(
 )
 axs[0].fill_between(
     f * 100,
-    np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=.70)['residual melt'] for f_i in f]) -
+    np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.82)['residual melt'] for f_i in f]) -
     delta_i['delta_i,BSE'],
-    np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=.990)['residual melt'] for f_i in f]) -
+    np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
     delta_i['delta_i,BSE'],
     color='cyan',
     alpha=0.3
@@ -146,7 +146,7 @@ axs[0].fill_between(
 
 # plot the vertical line at f_melt
 for name, run in runs.items():
-    axs[0].axvline(x=run["f_melt"] * 100, color=run['color'], linewidth=2.0)
+    axs[0].axvline(x=run["f_melt"] * 100, color=run['color'], linewidth=4.0)
 axs[0].set_xlabel(r'VMF$_{\rm K}$ (%)')
 axs[0].set_ylabel(r'$\Delta_{\rm K, Lunar-BSE}$ ($\perthousand$)')
 axs[0].legend(fontsize=12, loc='lower left')
@@ -184,6 +184,8 @@ axs[1].set_xscale('log')
 axs[0].set_xlim(0, 100)
 axs[1].set_xlim(10 ** -2, 100)
 axs[1].legend(fontsize=12)
+axs[0].set_title("Initial Vaporization")
+axs[1].set_title("Retained Vapor Recondensation")
 
 plt.tight_layout()
 # plt.show()
