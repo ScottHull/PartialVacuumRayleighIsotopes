@@ -17,20 +17,21 @@ delta_i = {
     'delta_i,Lunar-BSE': 0.415,
     'delta_i,Lunar-BSE (+/-err)': 0.05,
 }
-saturation_index = 0.989  # P_i / P_sat
+# saturation_index = 0.989  # P_i / P_sat
 alpha_kin = (39 / 41) ** 0.43  # the kinetic fractionation factor
-alpha_evap = 1 + (1 - saturation_index) * (alpha_kin - 1)  # the evaporative fractionation factor
 alpha_phys = np.sqrt(39 / 41)
 # f_melt_vap = f_melt / (f_melt + (1 - f_melt) * (1 - f_esc))
 runs = {
     "Canonical": {
-        "f_melt": 0.191,
+        # "f_melt": 0.191,
+        "f_melt": 0.8741,
         "f_esc": 0.74,
         "color": prop_cycle[0],
         # "linestyle": "solid",
     },
     "Half-Earths": {
-        "f_melt": 0.504,
+        # "f_melt": 0.504,
+        "f_melt": 0.8132,
         "f_esc": 0.16,
         "color": prop_cycle[1],
         # "linestyle": "dashed",
@@ -40,14 +41,15 @@ for run in runs:
     runs[run]['f_melt_vap'] = runs[run]['f_melt'] / (runs[run]['f_melt'] +
                                                      (1 - runs[run]['f_melt']) * (1 - runs[run]['f_esc']))
 
-print(
-    f"saturation index: {saturation_index}\n"
-    f"kinetic fractionation factor: {alpha_kin}\n"
-    f"evaporative fractionation factor: {alpha_evap}\n"
-)
+# print(
+#     f"saturation index: {saturation_index}\n"
+#     f"kinetic fractionation factor: {alpha_kin}\n"
+#     f"evaporative fractionation factor: {alpha_evap}\n"
+# )
 
 
-def initial_vaporization(f, delta_initial):
+def initial_vaporization(f, delta_initial, saturation_index=0.989):
+    alpha_evap = 1 + (1 - saturation_index) * (alpha_kin - 1)  # the evaporative fractionation factor
     residual_melt = (f ** (alpha_evap - 1) - 1) * 1000
     extract_vapor = ((1 - f ** alpha_evap) / (1 - f) - 1) * 1000
     return {
@@ -132,12 +134,22 @@ axs[0].plot(
     f * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['extract vapor'] for f_i in f]) -
     delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="dashdot", label=r'$\delta_{\rm K, vapor\ extract}$'
 )
+axs[0].fill_between(
+    f * 100,
+    np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=.70)['residual melt'] for f_i in f]) -
+    delta_i['delta_i,BSE'],
+    np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=.990)['residual melt'] for f_i in f]) -
+    delta_i['delta_i,BSE'],
+    color='cyan',
+    alpha=0.3
+)
+
 # plot the vertical line at f_melt
 for name, run in runs.items():
     axs[0].axvline(x=run["f_melt"] * 100, color=run['color'], linewidth=2.0)
 axs[0].set_xlabel(r'VMF$_{\rm K}$ (%)')
 axs[0].set_ylabel(r'$\Delta_{\rm K, Lunar-BSE}$ ($\perthousand$)')
-axs[0].legend(fontsize=12)
+axs[0].legend(fontsize=12, loc='lower left')
 
 # ================================= Plot Recondensation =================================
 # axs[1].plot(
@@ -156,9 +168,10 @@ for index, (name, run) in enumerate(runs.items()):
             [], [], linewidth=2.0, color='k', linestyle="dashdot", label=label2
         )
     delta_residual_vap = initial_vaporization(run['f_melt'], delta_i['delta_i,BSE'])
+    physically_fractionated_vapor = physical_fractionation(delta_residual_vap['extract vapor'], run)
     axs[1].plot(
         f * 100, np.array([two_reservoir_mixing(delta_residual_vap['residual melt'],
-                    physical_fractionation(delta_i['delta_i,Lunar'], run)['retained vapor'], x, run) for x in f]) -
+                    physically_fractionated_vapor['retained vapor'], x, run) for x in f]) -
         delta_i['delta_i,BSE'], linewidth=2.0, color=run['color']
     )
     axs[1].plot(
@@ -168,9 +181,24 @@ for index, (name, run) in enumerate(runs.items()):
     )
 axs[1].set_xlabel(r'x (%)')
 axs[1].set_xscale('log')
-axs[1].set_xlim(10 ** -2, 40)
+axs[0].set_xlim(0, 100)
+axs[1].set_xlim(10 ** -2, 100)
 axs[1].legend(fontsize=12)
 
 plt.tight_layout()
 # plt.show()
 plt.savefig("k_isotope_fractionation.png", format='png', dpi=200, bbox_inches='tight')
+
+# go through each run, print the residual melt and vapor values
+for run in runs:
+    residual_melt = initial_vaporization(runs[run]['f_melt'], delta_i['delta_i,BSE'])['residual melt'] - delta_i['delta_i,BSE']
+    vapor_extract = initial_vaporization(runs[run]['f_melt'], delta_i['delta_i,BSE'])['extract vapor'] - delta_i['delta_i,BSE']
+    retained_physically_fractionated_vapor = physical_fractionation(vapor_extract + delta_i['delta_i,BSE'], runs[run])['retained vapor'] - delta_i['delta_i,BSE']
+    escaping_physically_fractionated_vapor = physical_fractionation(vapor_extract + delta_i['delta_i,BSE'], runs[run])['escaping vapor'] - delta_i['delta_i,BSE']
+    print(
+        f"{run}:\n"
+        f"residual melt: {residual_melt}\n"
+        f"vapor extract: {vapor_extract}\n"
+        f"retained physically fractionated vapor: {retained_physically_fractionated_vapor}\n"
+        f"escaping physically fractionated vapor: {escaping_physically_fractionated_vapor}\n"
+    )

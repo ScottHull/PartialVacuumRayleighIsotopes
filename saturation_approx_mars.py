@@ -132,7 +132,8 @@ for index, (name, run) in enumerate(runs.items()):
     # if index == 0:
     #     ax.axvline(run['L'] / 1000, color='grey', linestyle='--', linewidth=2.0, label="Lunar Radius")
     S_as_func_of_r = []
-    for r in [1.5]:
+    # for r in [1.5]:
+    for r in radii:
         rho_k(run)
         eta_k(run)
         K_k(run)
@@ -146,15 +147,16 @@ for index, (name, run) in enumerate(runs.items()):
         S_as_func_of_r.append(run['saturation_index'])
         print(f'{name} at r = {r} m: {run["saturation_index"]}')
         # print(run)
-#     ax.plot(radii / 1000, S_as_func_of_r, label=name)
+    ax.plot(radii / 1000, S_as_func_of_r, label=name)
 #
-# ax.set_xlabel('r (km)')
-# ax.set_ylabel(r'$S_i$')
-# ax.set_xscale('log')
-# ax.grid()
-# ax.legend()
-# # turn on minor for both axes
-# ax.minorticks_on()
-# plt.tight_layout()
-# # plt.show()
-# plt.savefig("S_i_vs_r.png", format='png', dpi=200, bbox_inches='tight')
+ax.axvline(1.5 / 1000, color='black', linestyle='--', linewidth=2.0)
+ax.set_xlabel('r (km)')
+ax.set_ylabel(r'$S_{\rm K}$')
+ax.set_xscale('log')
+ax.grid()
+ax.legend()
+# turn on minor for both axes
+ax.minorticks_on()
+plt.tight_layout()
+# plt.show()
+plt.savefig("S_i_vs_r_mars.png", format='png', dpi=200, bbox_inches='tight')
