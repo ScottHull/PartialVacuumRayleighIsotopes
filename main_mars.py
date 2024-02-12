@@ -224,6 +224,8 @@ for index, ax in enumerate(axs.flatten()):
         # ax.set_yscale('log')
         ax.set_ylim(0, 55)
         ax.set_ylabel(r'$\Delta \rm ^{41}K$')
+        # flip the x-axis
+        ax.invert_xaxis()
     ax.text(0.05, 0.9, letters[index], transform=ax.transAxes, fontsize=18, fontweight='bold')
 
 axs.flatten()[-2].set_xlabel(r'$f_{\rm melt}$ (%)')
@@ -231,7 +233,7 @@ axs.flatten()[-1].set_xlabel('% Recondensed')
 axs.flatten()[0].set_title("Impact Vaporization", fontsize=18)
 axs.flatten()[1].set_title("Retained Vapor Recondensation", fontsize=18)
 
-axs[0, 0].legend(loc='lower left', fontsize=16)
+axs[0, 0].legend(loc='lower right', fontsize=16)
 
 plt.tight_layout()
 # plt.show()

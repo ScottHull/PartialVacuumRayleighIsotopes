@@ -126,16 +126,16 @@ for ax in axs:
 
 # ================================= Plot Residual Melt / Vapor Extract =================================
 axs[0].plot(
-    f * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
+    (1 - f) * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
     delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="solid", label=r'$\delta_{\rm K, residual\ melt}$'
 )
 # get the bounds where this line intersects the shaded region
 axs[0].plot(
-    f * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['extract vapor'] for f_i in f]) -
+    (1 - f) * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['extract vapor'] for f_i in f]) -
     delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="dashdot", label=r'$\delta_{\rm K, vapor\ extract}$'
 )
 axs[0].fill_between(
-    f * 100,
+    (1 - f) * 100,
     np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.82)['residual melt'] for f_i in f]) -
     delta_i['delta_i,BSE'],
     np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
@@ -146,14 +146,14 @@ axs[0].fill_between(
 
 # plot the vertical line at f_melt
 for name, run in runs.items():
-    axs[0].axvline(x=run["f_melt"] * 100, color=run['color'], linewidth=4.0)
+    axs[0].axvline(x=(1 - run["f_melt"]) * 100, color=run['color'], linewidth=4.0)
 axs[0].set_xlabel(r'VMF$_{\rm K}$ (%)')
 axs[0].set_ylabel(r'$\Delta_{\rm K, Lunar-BSE}$ ($\perthousand$)')
-axs[0].legend(fontsize=12, loc='lower left')
+axs[0].legend(fontsize=12, loc='lower right')
 
 # ================================= Plot Recondensation =================================
 # axs[1].plot(
-#     f * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
+#     (1 - f) * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
 #     delta_i['delta_i,BSE'],
 #     linewidth=2.0, label='Residual Melt'
 # )
@@ -179,6 +179,7 @@ for index, (name, run) in enumerate(runs.items()):
         np.array([two_reservoir_mixing(delta_residual_vap['residual melt'], delta_residual_vap['extract vapor'], x, run)
         for x in f]) - delta_i['delta_i,BSE'], linewidth=2.0, color=run['color'], linestyle="dashdot"
     )
+
 axs[1].set_xlabel(r'x (%)')
 axs[1].set_xscale('log')
 axs[0].set_xlim(0, 100)
@@ -186,6 +187,11 @@ axs[1].set_xlim(10 ** -2, 100)
 axs[1].legend(fontsize=12)
 axs[0].set_title("Initial Vaporization")
 axs[1].set_title("Retained Vapor Recondensation")
+
+# increase the linewidth in each legend
+for ax in axs:
+    for line in ax.get_lines():
+        line.set_linewidth(3.0)
 
 plt.tight_layout()
 # plt.show()
