@@ -167,7 +167,7 @@ global_solutions = {"run_name": [], 'f_melt': [], 'initial vaporization melt': [
                     'full recondensation with phys frac': []}
 
 # make a len(runs) rows x 2 columns figure
-fig, axs = plt.subplots(len(runs), 2, figsize=(10, len(runs) * 5), sharex='all')
+fig, axs = plt.subplots(len(runs), 2, figsize=(10, len(runs) * 5))
 for initial_comp_index, (initial_comp_name, initial_comp) in enumerate(runs.items()):
     axs[initial_comp_index, 0].text(
         0.65, 0.90, f"{initial_comp_name}", transform=axs[initial_comp_index, 0].transAxes, fontsize=22, fontweight='bold'
