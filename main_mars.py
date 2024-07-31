@@ -116,14 +116,14 @@ runs = {
 }
 
 saturation_indices = {
-    'G': 0.07153514070532385,
-    'H': 0.102519441414331,
-    'K': 0.04789976312884592,
-    'L': 0.04141597509920847,
-    # 'G': 0.8,
-    # 'H': 0.8,
-    # 'K': 0.8,
-    # 'L': 0.8,
+    # 'G': 0.07153514070532385,
+    # 'H': 0.102519441414331,
+    # 'K': 0.04789976312884592,
+    # 'L': 0.04141597509920847,
+    'G': 0.8,
+    'H': 0.8,
+    'K': 0.8,
+    'L': 0.8,
 }
 
 f = np.array(list(np.arange(0.0001, 0.1, 0.001)) + list(np.arange(0.1, 1, 0.01)))
@@ -170,7 +170,7 @@ global_solutions = {"run_name": [], 'f_melt': [], 'initial vaporization melt': [
 fig, axs = plt.subplots(len(runs), 2, figsize=(10, len(runs) * 5))
 for initial_comp_index, (initial_comp_name, initial_comp) in enumerate(runs.items()):
     axs[initial_comp_index, 0].text(
-        0.65, 0.90, f"{initial_comp_name}", transform=axs[initial_comp_index, 0].transAxes, fontsize=22, fontweight='bold'
+        0.62, 0.90, f"{initial_comp_name}", transform=axs[initial_comp_index, 0].transAxes, fontsize=22, fontweight='bold'
     )
     # TODO: re-enable this!
     # shade the region between the min and max saturation index
@@ -203,6 +203,7 @@ for initial_comp_index, (initial_comp_name, initial_comp) in enumerate(runs.item
             run['f_melt'] * 100, initial_vap_result['offset residual melt'],
             marker='o', color=run['color'], s=160, alpha=1, label=f'Run {run_name}'
         )
+        print(run_name, initial_vap_result['offset residual melt'])
         axs[initial_comp_index, 1].plot(
             f * 100, recondensation_w_phys_frac, linewidth=3.0, color=run['color']
         )
@@ -222,7 +223,7 @@ for index, ax in enumerate(axs.flatten()):
     ax.grid()
     if index % 2 == 0:
         # ax.set_yscale('log')
-        ax.set_ylim(0, 55)
+        ax.set_ylim(0, 10)
         ax.set_ylabel(r'$\Delta \rm ^{41}K$')
         # flip the x-axis
         ax.invert_xaxis()

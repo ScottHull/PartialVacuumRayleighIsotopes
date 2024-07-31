@@ -1,11 +1,13 @@
 import numpy as np
 import string
 import matplotlib.pyplot as plt
+import labellines as ll
+from random import randint
 
 # use the colorblind color package
 plt.style.use('seaborn-colorblind')
 # use 14 size font for all text
-plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'font.size': 18})
 # get the color cycle
 prop_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
@@ -99,12 +101,15 @@ def two_reservoir_mixing(delta_residual_melt, delta_retained_vapor, x_vap_recond
 f = np.array(list(np.arange(0.0001, 0.1, 0.001)) + list(np.arange(0.1, 1, 0.01)))
 
 # make a 2 column 1 row figure
-fig, axs = plt.subplots(1, 2, figsize=(12, 6), sharey='all')
-axs = axs.flatten()
+fig, axs = plt.subplots(1, 1, figsize=(8, 8), sharey='all')
+axs = [axs]
 letters = string.ascii_lowercase
 # ================================= Initial Setup =================================
 for ax in axs:
-    ax.axhline(y=delta_i['delta_i,Lunar-BSE'], color='grey', linewidth=2.0)
+    actual_line = ax.axhline(y=delta_i['delta_i,Lunar-BSE'], color='grey', linewidth=2.0)
+    # Add the label to the grey "Actual" line
+    ll.labelLine(actual_line, x=0.5, label='Actual')
+
     ax.axhspan(
         delta_i['delta_i,Lunar-BSE'] - delta_i['delta_i,Lunar-BSE (+/-err)'],
         delta_i['delta_i,Lunar-BSE'] + delta_i['delta_i,Lunar-BSE (+/-err)'],
@@ -125,17 +130,21 @@ for ax in axs:
     # )
 
 # ================================= Plot Residual Melt / Vapor Extract =================================
-axs[0].plot(
-    (1 - f) * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
-    delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="solid", label=r'$\delta_{\rm K, residual\ melt}$'
+residual_melt_line = axs[0].plot(
+    (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
+    delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="solid"
 )
+ll.labelLine(residual_melt_line[0], x=0.5, label=r'$\delta_{\rm K, residual\ melt}$ ($S = 0.99$)', fontsize=16)
+
 # get the bounds where this line intersects the shaded region
-axs[0].plot(
-    (1 - f) * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['extract vapor'] for f_i in f]) -
-    delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="dashdot", label=r'$\delta_{\rm K, vapor\ extract}$'
+extract_vapor_line = axs[0].plot(
+    (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['extract vapor'] for f_i in f]) -
+    delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="dashdot"
 )
+ll.labelLine(extract_vapor_line[0], x=0.5, label=r'$\delta_{\rm K, vapor\ extract}$ ($S = 0.99$)', fontsize=16)
+
 axs[0].fill_between(
-    (1 - f) * 100,
+    (1 - f),
     np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.82)['residual melt'] for f_i in f]) -
     delta_i['delta_i,BSE'],
     np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
@@ -146,56 +155,60 @@ axs[0].fill_between(
 
 # plot the vertical line at f_melt
 for name, run in runs.items():
-    axs[0].axvline(x=(1 - run["f_melt"]) * 100, color=run['color'], linewidth=4.0)
+    axs[0].axvline(x=(1 - run["f_melt"]), color=run['color'], linewidth=4.0)
 axs[0].set_xlabel(r'VMF$_{\rm K}$ (%)')
 axs[0].set_ylabel(r'$\Delta {\rm ^{41}K}$ ($\perthousand$)')
 axs[0].legend(fontsize=12, loc='lower right')
 
 # ================================= Plot Recondensation =================================
 # axs[1].plot(
-#     (1 - f) * 100, np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
+#     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
 #     delta_i['delta_i,BSE'],
 #     linewidth=2.0, label='Residual Melt'
 # )
 for index, (name, run) in enumerate(runs.items()):
     label1 = r'$\delta_{\rm K, disk}$' + " (Physical Fractionation)"
     label2 = r'$\delta_{\rm K, disk}$' + " (No Physical Fractionation)"
-    if index != 0:
-        axs[1].plot(
-            [], [], linewidth=2.0, color='k', linestyle="solid", label=label1
-        )
-        axs[1].plot(
-            [], [], linewidth=2.0, color='k', linestyle="dashdot", label=label2
-        )
     delta_residual_vap = initial_vaporization(run['f_melt'], delta_i['delta_i,BSE'])
     physically_fractionated_vapor = physical_fractionation(delta_residual_vap['extract vapor'], run)
-    axs[1].plot(
-        f * 100, np.array([two_reservoir_mixing(delta_residual_vap['residual melt'],
-                    physically_fractionated_vapor['retained vapor'], x, run) for x in f]) -
-        delta_i['delta_i,BSE'], linewidth=2.0, color=run['color']
-    )
-    axs[1].plot(
-        f * 100,
-        np.array([two_reservoir_mixing(delta_residual_vap['residual melt'], delta_residual_vap['extract vapor'], x, run)
-        for x in f]) - delta_i['delta_i,BSE'], linewidth=2.0, color=run['color'], linestyle="dashdot"
-    )
 
-axs[1].set_xlabel(r'x (%)')
-axs[1].set_xscale('log')
-axs[0].set_xlim(0, 100)
-axs[1].set_xlim(10 ** -2, 100)
-axs[1].legend(fontsize=12)
-axs[0].set_title("Initial Vaporization")
-axs[1].set_title("Retained Vapor Recondensation")
-
+axs[0].set_xlim(0, 1)
+# axs[0].set_title("Initial Vaporization")
 # increase the linewidth in each legend
 for ax in axs:
     for line in ax.get_lines():
         line.set_linewidth(3.0)
 
+# Add annotation for the cyan line
+axs[0].annotate(
+    r'$\mathbf{0.7 \leq S_{\rm K} \leq 0.8}$',
+    xy=(22 / 100, 0.55),  # Adjust the coordinates to point inside the shaded cyan region
+    xytext=(38 / 100, 0.50),  # Adjust the text position as needed
+    arrowprops=dict(facecolor='cyan', edgecolor='black', linewidth=1.5, shrink=0.05),
+    fontsize=22,  # Increase font size
+    color='cyan',
+    fontweight='bold'  # Make the font bold
+)
+
+# Add annotation for the black line
+# axs[0].annotate(
+#     r'$\mathbf{S = 0.99}$',
+#     xy=(46 / 100, 0.14),  # Adjust the coordinates to point inside the shaded cyan region
+#     xytext=(70 / 100, 0.08),  # Adjust the text position as needed
+#     arrowprops=dict(facecolor='black', edgecolor='black', linewidth=1.5, shrink=0.05),
+#     fontsize=22,  # Increase font size
+#     color='black',
+#     fontweight='bold'  # Make the font bold
+# )
+
+# Set x-axis labels to range from 0 to 100
+for ax in axs:
+    ax.set_xticks(np.linspace(0, 1, 11))  # Set tick positions from 0 to 1 with 10 intervals
+    ax.set_xticklabels([str(int(x * 100)) for x in np.linspace(0, 1, 11)])  # Set tick labels from 0 to 100
+
 plt.tight_layout()
-# plt.show()
-plt.savefig("k_isotope_fractionation.png", format='png', dpi=200, bbox_inches='tight')
+plt.show()
+plt.savefig("k_isotope_fractionation_single.png", format='png', dpi=200, bbox_inches='tight')
 
 # go through each run, print the residual melt and vapor values
 for run in runs:
