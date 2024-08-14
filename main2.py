@@ -153,6 +153,30 @@ axs[0].fill_between(
     alpha=0.3
 )
 
+s_082 = axs[0].plot(
+    (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.82)['residual melt'] for f_i in f]) -
+    delta_i['delta_i,BSE'],
+    linewidth=2.0, color='cyan'
+)
+s_092 = axs[0].plot(
+    (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
+    delta_i['delta_i,BSE'],
+    linewidth=2.0, color='cyan'
+)
+
+# s_082 = axs[0].plot(
+#     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.82)['residual melt'] for f_i in f]) -
+#     delta_i['delta_i,BSE'],
+#     linewidth=2.0, color='cyan', label=r'$\delta_{\rm K, residual\ melt}$ ($S = 0.82$)'
+# )
+# s_092 = axs[0].plot(
+#     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
+#     delta_i['delta_i,BSE'],
+#     linewidth=2.0, color='cyan', label=r'$\delta_{\rm K, residual\ melt}$ ($S = 0.92$)'
+# )
+# ll.labelLine(s_082[0], x=0.08, label=r'$\delta_{\rm K, vapor\ extract}$ ($S = 0.82$)', fontsize=16, color='cyan')
+# ll.labelLine(s_092[0], x=0.08, label=r'$\delta_{\rm K, vapor\ extract}$ ($S = 0.92$)', fontsize=16, color='cyan')
+
 # plot the vertical line at f_melt
 for name, run in runs.items():
     axs[0].axvline(x=(1 - run["f_melt"]), color=run['color'], linewidth=4.0)
@@ -181,7 +205,7 @@ for ax in axs:
 
 # Add annotation for the cyan line
 axs[0].annotate(
-    r'$\mathbf{0.7 \leq S_{\rm K} \leq 0.8}$',
+    r'$\mathbf{0.82 \leq S_{\rm K} \leq 0.92}$',
     xy=(22 / 100, 0.55),  # Adjust the coordinates to point inside the shaded cyan region
     xytext=(38 / 100, 0.50),  # Adjust the text position as needed
     arrowprops=dict(facecolor='cyan', edgecolor='black', linewidth=1.5, shrink=0.05),
@@ -207,7 +231,7 @@ for ax in axs:
     ax.set_xticklabels([str(int(x * 100)) for x in np.linspace(0, 1, 11)])  # Set tick labels from 0 to 100
 
 plt.tight_layout()
-plt.show()
+# plt.show()
 plt.savefig("k_isotope_fractionation_single.png", format='png', dpi=200, bbox_inches='tight')
 
 # go through each run, print the residual melt and vapor values
