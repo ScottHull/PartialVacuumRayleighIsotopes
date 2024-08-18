@@ -134,14 +134,14 @@ residual_melt_line = axs[0].plot(
     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['residual melt'] for f_i in f]) -
     delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="solid"
 )
-ll.labelLine(residual_melt_line[0], x=0.5, label=r'$\delta_{\rm K, residual\ melt}$ ($S = 0.99$)', fontsize=16)
+ll.labelLine(residual_melt_line[0], x=0.5, label=r'($S_{\rm K} = 0.99$)', fontsize=16)
 
 # get the bounds where this line intersects the shaded region
 extract_vapor_line = axs[0].plot(
     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'])['extract vapor'] for f_i in f]) -
     delta_i['delta_i,BSE'], linewidth=2.0, color="k", linestyle="dashdot"
 )
-ll.labelLine(extract_vapor_line[0], x=0.5, label=r'$\delta_{\rm K, vapor\ extract}$ ($S = 0.99$)', fontsize=16)
+ll.labelLine(extract_vapor_line[0], x=0.5, label=r'($S_{\rm K} = 0.99$)', fontsize=16)
 
 axs[0].fill_between(
     (1 - f),
@@ -155,27 +155,16 @@ axs[0].fill_between(
 
 s_082 = axs[0].plot(
     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.82)['residual melt'] for f_i in f]) -
-    delta_i['delta_i,BSE'],
-    linewidth=2.0, color='cyan'
-)
-s_092 = axs[0].plot(
-    (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
-    delta_i['delta_i,BSE'],
-    linewidth=2.0, color='cyan'
+    delta_i['delta_i,BSE'], linewidth=2.0, color="black", linestyle="solid", label=r'($S_{\rm K} = 0.82$)'
 )
 
-# s_082 = axs[0].plot(
-#     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.82)['residual melt'] for f_i in f]) -
-#     delta_i['delta_i,BSE'],
-#     linewidth=2.0, color='cyan', label=r'$\delta_{\rm K, residual\ melt}$ ($S = 0.82$)'
-# )
-# s_092 = axs[0].plot(
-#     (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
-#     delta_i['delta_i,BSE'],
-#     linewidth=2.0, color='cyan', label=r'$\delta_{\rm K, residual\ melt}$ ($S = 0.92$)'
-# )
-# ll.labelLine(s_082[0], x=0.08, label=r'$\delta_{\rm K, vapor\ extract}$ ($S = 0.82$)', fontsize=16, color='cyan')
-# ll.labelLine(s_092[0], x=0.08, label=r'$\delta_{\rm K, vapor\ extract}$ ($S = 0.92$)', fontsize=16, color='cyan')
+s_092 = axs[0].plot(
+    (1 - f), np.array([initial_vaporization(f_i, delta_i['delta_i,BSE'], saturation_index=0.92)['residual melt'] for f_i in f]) -
+    delta_i['delta_i,BSE'], linewidth=2.0, color="black", linestyle="solid", label=r'($S_{\rm K} = 0.92$)'
+)
+
+ll.labelLine(s_082[0], x=0.08, fontsize=16, label=r'($S_{\rm K} = 0.82$)')
+ll.labelLine(s_092[0], x=0.20, fontsize=16, label=r'($S_{\rm K} = 0.92$)')
 
 # plot the vertical line at f_melt
 for name, run in runs.items():
@@ -196,23 +185,23 @@ for index, (name, run) in enumerate(runs.items()):
     delta_residual_vap = initial_vaporization(run['f_melt'], delta_i['delta_i,BSE'])
     physically_fractionated_vapor = physical_fractionation(delta_residual_vap['extract vapor'], run)
 
-axs[0].set_xlim(0, 1)
+# axs[0].set_xlim(0, 0.9)
 # axs[0].set_title("Initial Vaporization")
 # increase the linewidth in each legend
 for ax in axs:
     for line in ax.get_lines():
         line.set_linewidth(3.0)
 
-# Add annotation for the cyan line
-axs[0].annotate(
-    r'$\mathbf{0.82 \leq S_{\rm K} \leq 0.92}$',
-    xy=(22 / 100, 0.55),  # Adjust the coordinates to point inside the shaded cyan region
-    xytext=(38 / 100, 0.50),  # Adjust the text position as needed
-    arrowprops=dict(facecolor='cyan', edgecolor='black', linewidth=1.5, shrink=0.05),
-    fontsize=22,  # Increase font size
-    color='cyan',
-    fontweight='bold'  # Make the font bold
-)
+# # Add annotation for the cyan line
+# axs[0].annotate(
+#     r'$\mathbf{0.7 \leq S_{\rm K} \leq 0.8}$',
+#     xy=(22 / 100, 0.55),  # Adjust the coordinates to point inside the shaded cyan region
+#     xytext=(38 / 100, 0.50),  # Adjust the text position as needed
+#     arrowprops=dict(facecolor='cyan', edgecolor='black', linewidth=1.5, shrink=0.05),
+#     fontsize=22,  # Increase font size
+#     color='cyan',
+#     fontweight='bold'  # Make the font bold
+# )
 
 # Add annotation for the black line
 # axs[0].annotate(
@@ -229,6 +218,8 @@ axs[0].annotate(
 for ax in axs:
     ax.set_xticks(np.linspace(0, 1, 11))  # Set tick positions from 0 to 1 with 10 intervals
     ax.set_xticklabels([str(int(x * 100)) for x in np.linspace(0, 1, 11)])  # Set tick labels from 0 to 100
+
+axs[0].set_xlim(0, 0.9)
 
 plt.tight_layout()
 # plt.show()

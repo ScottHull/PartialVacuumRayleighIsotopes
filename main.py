@@ -148,7 +148,7 @@ axs[0].fill_between(
 for name, run in runs.items():
     axs[0].axvline(x=(1 - run["f_melt"]) * 100, color=run['color'], linewidth=4.0)
 axs[0].set_xlabel(r'VMF$_{\rm K}$ (%)')
-axs[0].set_ylabel(r'$\Delta {\rm ^{41}K}$ ($\perthousand$)')
+axs[0].set_ylabel(r'$\Delta_{\rm K, Lunar-BSE}$ ($\perthousand$)')
 axs[0].legend(fontsize=12, loc='lower right')
 
 # ================================= Plot Recondensation =================================
